@@ -90,6 +90,7 @@ header p { color: var(--muted); max-width: 34ch; }
 .empty { color: var(--muted); }
 .total { display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .note { color: var(--muted); font-size: .92rem; min-height: 1.4em; }
+.note.done { color: var(--accent); font-size: 1rem; font-weight: 600; }
 
 footer { color: var(--muted); font-size: .9rem; }
 .link { border: 0; background: none; padding: 0; color: var(--muted); text-decoration: underline; }
@@ -199,13 +200,18 @@ footer { color: var(--muted); font-size: .9rem; }
 
 <script>
 /* Paste your Google Analytics Measurement ID between the quotes, for example "G-AB12CD34EF". */
-const GA_MEASUREMENT_ID = "";
+const GA_MEASUREMENT_ID = "G-P6VHK0H215";
 
 const ITEMS = {
   couch: { name: "Couch", price: 39 },
   chair: { name: "Chair", price: 15 }
 };
 const $ = id => document.getElementById(id);
+
+function showNote(text, done = false) {
+  $("note").textContent = text;
+  $("note").classList.toggle("done", done);
+}
 
 /* Basket: belongs to this visitor only */
 const basket = { couch: 0, chair: 0 };
@@ -235,7 +241,7 @@ function renderBasket() {
     rm.type = "button";
     rm.textContent = "Remove";
     rm.setAttribute("aria-label", "Remove one " + ITEMS[k].name.toLowerCase());
-    rm.onclick = () => { basket[k]--; renderBasket(); $("note").textContent = ""; };
+    rm.onclick = () => { basket[k]--; renderBasket(); showNote(""); };
     li.append(label, sum, rm);
     list.append(li);
   }
@@ -301,24 +307,24 @@ document.querySelectorAll("[data-item]").forEach(btn => {
     const k = btn.dataset.item;
     basket[k]++;
     renderBasket();
-    $("note").textContent = ITEMS[k].name + " added to your basket.";
+    showNote(ITEMS[k].name + " added to your basket.");
     record("basket_" + k);
   });
 });
 
 $("checkout").addEventListener("click", () => {
   if (!Object.values(basket).some(Boolean)) {
-    $("note").textContent = "Your basket is empty. Add the couch or the chair first.";
+    showNote("Your basket is empty. Add the couch or the chair first.");
     return;
   }
-  $("note").textContent = "Online checkout opens soon. Your basket stays saved on this device.";
+  showNote("Done! Online checkout opens soon.", true);
   record("checkout");
 });
 
 $("no-rent").addEventListener("click", () => {
   for (const k in basket) basket[k] = 0;
   renderBasket();
-  $("note").textContent = "No problem. Your basket is now empty.";
+  showNote("Done! Your basket is now empty.", true);
   record("no_rent");
 });
 
